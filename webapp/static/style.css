@@ -1,0 +1,46 @@
+
+h1 {
+    text-align: center;
+    font-family: 'Montserrat', sans-serif;
+}
+
+form {
+    text-align: center;
+}
+
+.custom-file-input {
+    color: transparent;
+    display: none; 
+}
+
+.custom-file-label { /* bouton */
+    display: inline-block;
+    background-color: red; 
+    color: white; /* couleur texte  */
+    padding: 20px 50px; /* taille bouton */
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.custom-file-label span { /* texte bouton */
+    display: inline-block;
+    font-weight: bold;
+    font-size: 1.2em;
+    font-family: 'roboto', sans-serif;
+}
+
+.image-container { 
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+    margin: 20px 0; 
+}
+
+.image-wrapper {
+    margin: 0 10px; /* espace images */
+}
+
+#inputImage, #colorizedImage {
+    max-width: 100%;
+    height: auto; 
+}

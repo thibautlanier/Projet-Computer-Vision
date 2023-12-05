@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Colorize Image</title>
+</head>
+<body>
+    <h1>Colorize Image</h1>
+    <form action="/" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" id="fileInput" accept=".jpg, .jpeg, .png" class="custom-file-input" onchange="this.form.submit()" required>
+        <label for="fileInput" class="custom-file-label">
+            <span>Select image files</span>
+        </label>
+    </form>
+    {% if colorized_image_path %}
+    <div class="image-container">
+        <div class="image-wrapper" id="inputImageWrapper">
+            <!-- input image -->
+            <img src="{{ input_image_path }}" alt="Input Image" id="inputImage">
+        </div>
+        <div class="image-wrapper" id="colorizedImageWrapper">
+            <!-- colorized image -->
+            <img src="{{ colorized_image_path }}" alt="Colorized Image" id="colorizedImage">
+        </div>
+    </div>
+    {% endif %}
+</body>
+</html>
