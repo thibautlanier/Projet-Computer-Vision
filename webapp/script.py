@@ -3,7 +3,7 @@ import torch
 from torchvision import transforms
 from PIL import Image
 import numpy as np
-from network import NetworkColor
+from network import NetworkColor, NetworkColor2
 from skimage import color
 from matplotlib import pyplot as plt
 from torchvision.transforms import v2
@@ -12,7 +12,7 @@ app = Flask(__name__)
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model = NetworkColor()
+model = NetworkColor2()
 model.load_state_dict(torch.load('../model.pth'))
 model.to(device)
 model.eval()
