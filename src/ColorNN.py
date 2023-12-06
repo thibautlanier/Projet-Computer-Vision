@@ -1,5 +1,5 @@
 import torch
-from torch import nn
+from torch import nn, concat
 
 class ColorNN(nn.Module):
 	def __init__(self, *args, **kwargs) -> None:
@@ -37,6 +37,60 @@ class ColorNN(nn.Module):
 		return nn.Sequential(
 			nn.Conv2d(c_in, c_out, k_size, stride, padding, padding_mode=padding_mode),
 			nn.ReLU(),
-			# nn.Conv2d(c_out, c_out, k_size, stride, padding, padding_mode=padding_mode),
-			# nn.ReLU()
+			nn.Conv2d(c_out, c_out, k_size, stride, padding, padding_mode=padding_mode),
+			nn.ReLU()
 		)
+	
+class UpscaleResidualNN(ColorNN):
+	def __init__(self) -> None:
+		super().__init__()
+		
+		self.encod1 = nn.Sequential(
+			self.DoubleConv2d(1, 16),
+			nn.BatchNorm2d(16)
+		)
+		self.encod2 = nn.Sequential(
+			self.DoubleConv2d(16, 32),
+			nn.BatchNorm2d(32)
+		)
+		self.encod3 = nn.Sequential(
+			self.DoubleConv2d(32, 64),
+			nn.BatchNorm2d(64)
+		)
+		self.encod4 = nn.Sequential(
+			self.DoubleConv2d(64, 128),
+			nn.BatchNorm2d(128)
+		)
+
+		self.decod1 = nn.Sequential(
+			nn.ConvTranspose2d(128, 64, 2, 2),
+			nn.BatchNorm2d(64)
+		)
+		self.decod2 = nn.Sequential(
+			self.DoubleConv2d(128, 64),
+			nn.ConvTranspose2d(64, 32, 2, 2),
+			nn.BatchNorm2d(32)
+		)
+		self.decod3 = nn.Sequential(
+			self.DoubleConv2d(64, 32),
+			nn.ConvTranspose2d(32, 16, 2, 2),
+			nn.BatchNorm2d(16)
+		)
+		self.decod4 = nn.Sequential(
+			self.DoubleConv2d(32, 16),
+			nn.Conv2d(16, 2, 1),
+			nn.BatchNorm2d(2)
+		)
+
+	
+	def forward(self, X):
+		X_1 = self.encod1(X) #16
+		X_2 = self.encod2(nn.MaxPool2d(2)(X_1)) #32
+		X_4 = self.encod3(nn.MaxPool2d(2)(X_2)) #64
+		X_8 = self.encod4(nn.MaxPool2d(2)(X_4)) #128
+
+		result = self.decod1(X_8)
+		result = self.decod2(concat((X_4,result), dim=1))
+		result = self.decod3(concat((X_2,result), dim=1))
+		result = self.decod4(concat((X_1,result), dim=1))
+		return concat((X, result), dim=1)
