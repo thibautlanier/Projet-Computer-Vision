@@ -6,3 +6,6 @@ DIV2K_valid_LR_x8/*
 runs/*
 *.zip
 __pycache__
+webapp/static/colorized_image.jpg
+webapp/__pycache__/network.cpython-310.pyc
+webapp/static/input_image.jpg
