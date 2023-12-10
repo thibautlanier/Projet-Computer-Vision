@@ -9,7 +9,7 @@ class NetworkColor(nn.Module):
         Initializes each part of the convolutional neural network.
         """
         super().__init__()
-        self.conv1 = nn.Conv2d(1, 32, kernel_size=4, stride=2, padding=1)
+        self.conv1 = nn.Conv2d(3, 32, kernel_size=4, stride=2, padding=1)
         self.conv1_bn = nn.BatchNorm2d(32)
         self.conv2 = nn.Conv2d(32, 64, kernel_size=4, stride=2, padding=1)
         self.conv2_bn = nn.BatchNorm2d(64)
@@ -34,7 +34,7 @@ class NetworkColor(nn.Module):
 class NetworkColor2(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv1 = nn.Conv2d(1, 32, kernel_size=4, stride=2, padding=1)
+        self.conv1 = nn.Conv2d(3, 32, kernel_size=4, stride=2, padding=1)
         self.conv1_bn = nn.BatchNorm2d(32)
         self.conv2 = nn.Conv2d(32, 64, kernel_size=4, stride=2, padding=1)
         self.conv2_bn = nn.BatchNorm2d(64)
