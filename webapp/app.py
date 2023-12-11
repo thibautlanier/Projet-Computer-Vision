@@ -28,7 +28,8 @@ def preprocess_image(image, started=False):
         v2.Resize((128,128), antialias=True),
     ])
     image = transform(image)
-    
+    print(image[0, ...])
+    print("#################################################### ")
     if started:
         image[2, ...] = torch.zeros_like(image[2, ...])
         image[1, ...] = torch.zeros_like(image[1, ...])
@@ -89,13 +90,14 @@ def index():
             input_image = preprocess_image(image, True)
        
             input_image_path = 'static/input_image.jpg'
- 
-            input_image = input_image.squeeze().detach().moveaxis(0, 2).cpu().numpy()
-         
-            input_image = input_image.astype(np.uint8)
 
-            input_image = Image.fromarray(input_image)
-            input_image = input_image.convert('L')
+            input_image = input_image.squeeze().detach().moveaxis(0, 2).cpu().numpy()
+
+            input_image = color.lab2rgb(input_image)
+
+            input_image = Image.fromarray((input_image * 255).astype(np.uint8))
+            print("#################################################### ")
+            
             input_image = input_image.resize((256,256))
             input_image.save(input_image_path)
 
