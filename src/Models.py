@@ -1,4 +1,4 @@
-from torch import nn, cat, relu
+from torch import nn, cat, relu, save, load
 
 class NetworkColor(nn.Module):
     def __init__(self):
@@ -126,8 +126,8 @@ class NetworkColor2(nn.Module):
         x_8 = cat((x_8, x_1), 1)
         x_9 = relu(self.t_conv4(x_8))
         x_9 = cat((x_9, x), 1)
-        x = self.output(x_9)
-        return x
+        x_f = self.output(x_9)
+        return cat((x, x_f), 1)
 
 class ColorNN(nn.Module):
 	def __init__(self, *args, **kwargs) -> None:
@@ -168,57 +168,14 @@ class ColorNN(nn.Module):
 			nn.Conv2d(c_out, c_out, k_size, stride, padding, padding_mode=padding_mode),
 			nn.ReLU()
 		)
-	
-class UpscaleResidualNN(ColorNN):
-	def __init__(self) -> None:
-		super().__init__()
-		
-		self.encod1 = nn.Sequential(
-			self.DoubleConv2d(1, 16),
-			nn.BatchNorm2d(16)
-		)
-		self.encod2 = nn.Sequential(
-			self.DoubleConv2d(16, 32),
-			nn.BatchNorm2d(32)
-		)
-		self.encod3 = nn.Sequential(
-			self.DoubleConv2d(32, 64),
-			nn.BatchNorm2d(64)
-		)
-		self.encod4 = nn.Sequential(
-			self.DoubleConv2d(64, 128),
-			nn.BatchNorm2d(128)
-		)
 
-		self.decod1 = nn.Sequential(
-			nn.ConvTranspose2d(128, 64, 2, 2),
-			nn.BatchNorm2d(64)
-		)
-		self.decod2 = nn.Sequential(
-			self.DoubleConv2d(128, 64),
-			nn.ConvTranspose2d(64, 32, 2, 2),
-			nn.BatchNorm2d(32)
-		)
-		self.decod3 = nn.Sequential(
-			self.DoubleConv2d(64, 32),
-			nn.ConvTranspose2d(32, 16, 2, 2),
-			nn.BatchNorm2d(16)
-		)
-		self.decod4 = nn.Sequential(
-			self.DoubleConv2d(32, 16),
-			nn.Conv2d(16, 2, 1),
-			nn.BatchNorm2d(2)
-		)
+def save_model(model, path=None):
+    if path is None:
+        path = "model.pt"
+    save(model.state_dict(), path)
 
-	
-	def forward(self, X):
-		X_1 = self.encod1(X) #16
-		X_2 = self.encod2(nn.MaxPool2d(2)(X_1)) #32
-		X_4 = self.encod3(nn.MaxPool2d(2)(X_2)) #64
-		X_8 = self.encod4(nn.MaxPool2d(2)(X_4)) #128
-
-		result = self.decod1(X_8)
-		result = self.decod2(cat((X_4,result), dim=1))
-		result = self.decod3(cat((X_2,result), dim=1))
-		result = self.decod4(cat((X_1,result), dim=1))
-		return cat((X, result), dim=1)
+def load_model(model, path=None):
+    if path is None:
+        path = f"{model.__name__}.pt"
+    model.load_state_dict(load(path))
+    return model

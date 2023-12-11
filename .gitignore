@@ -9,3 +9,5 @@ __pycache__
 webapp/static/colorized_image.jpg
 webapp/__pycache__/network.cpython-310.pyc
 webapp/static/input_image.jpg
+*.pt
+*.pth
