@@ -10,37 +10,59 @@ SIZE = 128
 def choose_pixel():
     return (randint(0, SIZE-1), randint(0, SIZE-1))
 
-def ab_percent(percent=0.01):
+def ab_percent(percent=0.2):
     return int(SIZE**2 * percent)
 
 
 class CocoDataset(Dataset):
-	def __init__(self, root:str, split:str = "train", add_pixels:bool = False, transform:callable = None, loader:callable = None) -> None:
-		super().__init__()
-		self.dir = os.path.join(root, "coco_dataset", split)
-		if not self.is_present(self.dir):
-			raise FileNotFoundError("Dataset not downloaded")
-		self.data = os.listdir(self.dir)
-		self.transforms = transform
-		if loader is not None:
-			self.loader = loader
-		else:
-			self.loader = Image.open
+    def __init__(self, root:str, split:str = "train", add_pixels:bool = False, percent=0.01,transform:callable = None, loader:callable = None) -> None:
+        super().__init__()
+        self.dir = os.path.join(root, "coco_dataset", split)
+        if not self.is_present(self.dir):
+            raise FileNotFoundError("Dataset not downloaded")
+        self.data = os.listdir(self.dir)
+        self.transforms = transform
+        self.add_pixel = add_pixels
+        self.percent = percent
+        if loader is not None:
+            self.loader = loader
+        else:
+            self.loader = Image.open
 
-	def is_present(self, dir:str) -> bool:
-		return os.path.exists(dir)
-	
-	def get_info(self) -> str:
-		return f"Dataset: {self.dir} \tNumber of images: {len(self.data)}"
 
-	def __getitem__(self, index) -> Any:
-		img = self.loader(os.path.join(self.dir, self.data[index])).convert("RGB")
-		if self.transforms is not None:
-			img = self.transforms(img)
-		return img[0:1,...], img
-	
-	def __len__(self) -> int:
-		return len(self.data)
+    def is_present(self, dir:str) -> bool:
+        return os.path.exists(dir)
+    
+    def get_info(self) -> str:
+        return f"Dataset: {self.dir} \tNumber of images: {len(self.data)}"
+
+    def __getitem__(self, index) -> Any:
+        img = self.loader(os.path.join(self.dir, self.data[index])).convert("RGB")
+        if self.transforms is not None:
+            img = self.transforms(img)
+
+        if not self.add_pixel:
+            return img[0:1,...], img
+        
+        l_channel = img[0, ...].unsqueeze(0)
+        a_channel = img[1, ...].unsqueeze(0)
+        b_channel = img[2, ...].unsqueeze(0)
+
+        modified_a_channel = zeros_like(a_channel)
+        modified_b_channel = zeros_like(b_channel)
+    
+        num_pixels_to_modify = ab_percent(self.percent)
+        for _ in range(num_pixels_to_modify):
+            chosen_pixel = choose_pixel()
+            chosen_pixel_color = img[:, chosen_pixel[0], chosen_pixel[1]].unsqueeze(1).unsqueeze(2)
+            modified_a_channel[:, chosen_pixel[0], chosen_pixel[1]] = chosen_pixel_color[1, 0, 0]
+            modified_b_channel[:, chosen_pixel[0], chosen_pixel[1]] = chosen_pixel_color[2, 0, 0]
+        modified_img = cat([l_channel, modified_a_channel, modified_b_channel], dim=0)
+        return modified_img, img
+        
+
+    def __len__(self) -> int:
+        return len(self.data)
 
 class CustomFlowersDataset(Dataset):
     def __init__(self, root, split="train", transform=None, download=False):

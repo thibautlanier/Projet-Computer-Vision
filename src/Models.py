@@ -75,10 +75,10 @@ class NetworkColor(nn.Module):
         x_9 = cat((x_9, x), 1)
         return cat((x, self.output(x_9)), 1)
     
-class NetworkColor2(nn.Module):
+class NetworkColorWithScribble(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv1 = nn.Conv2d(1, 32, kernel_size=4, stride=2, padding=1)
+        self.conv1 = nn.Conv2d(3, 32, kernel_size=4, stride=2, padding=1)
         self.conv1_bn = nn.BatchNorm2d(32)
         self.conv2 = nn.Conv2d(32, 64, kernel_size=4, stride=2, padding=1)
         self.conv2_bn = nn.BatchNorm2d(64)
@@ -101,7 +101,7 @@ class NetworkColor2(nn.Module):
         self.t_conv3_bn = nn.BatchNorm2d(32)
         self.t_conv4 = nn.ConvTranspose2d(64, 2, kernel_size=4, stride=2, padding=1)
 
-        self.output = nn.Conv2d(3, 2, kernel_size=3, stride=1, padding=1)
+        self.output = nn.Conv2d(5, 2, kernel_size=3, stride=1, padding=1)
 
     def forward(self, x):
         """
@@ -127,7 +127,8 @@ class NetworkColor2(nn.Module):
         x_9 = relu(self.t_conv4(x_8))
         x_9 = cat((x_9, x), 1)
         x_f = self.output(x_9)
-        return cat((x, x_f), 1)
+
+        return cat((x[:,0,...].unsqueeze(1), x_f), 1)
 
 class ColorNN(nn.Module):
 	def __init__(self, *args, **kwargs) -> None:

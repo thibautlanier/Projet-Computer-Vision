@@ -80,5 +80,5 @@ function paintImage(event) {
     var x = event.clientX - modalCanvas.getBoundingClientRect().left;
     var y = event.clientY - modalCanvas.getBoundingClientRect().top;
     context.fillStyle = currentColor;
-    context.fillRect(x, y, 3, 3); 
+    context.fillRect(x, y, 1, 1); 
 }
