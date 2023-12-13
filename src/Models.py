@@ -171,11 +171,11 @@ class ColorNN(nn.Module):
 
 def save_model(model, path=None):
     if path is None:
-        path = "model.pt"
+        path = f"{model.__class__.__name__}.pt"
     save(model.state_dict(), path)
 
 def load_model(model, path=None):
     if path is None:
-        path = f"{model.__name__}.pt"
+        path = f"{model.__class__.__name__}.pt"
     model.load_state_dict(load(path))
     return model
