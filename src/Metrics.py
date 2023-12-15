@@ -9,11 +9,11 @@ def compute_psnr(img1, img2):
 	# 	return float('inf')
 	# max_pixel = 255.0
 	# psnr = 20 * np.log10(max_pixel / np.sqrt(mse))
-	p = psnr(img1, img2)
+	p = psnr(img1, img2, data_range=(img2.max() - img2.min()))
 	return p
 
 def compute_ssim(img1, img2):
-	s = ssim(img1, img2, channel_axis=0, data_range=(img1.max() - img1.min()))
+	s = ssim(img1, img2, channel_axis=0, data_range=(img2.max() - img2.min()))
 	return s
 
 def batch_metrics(model, X, y, device, metric="PSNR"):
