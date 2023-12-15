@@ -3,7 +3,7 @@ import torch
 from torchvision import transforms
 from PIL import Image
 import numpy as np
-from network import NetworkColor, NetworkColor2
+from network import NetworkColor, NetworkColorWithScribble
 from skimage import color
 from matplotlib import pyplot as plt
 from torchvision.transforms import v2
@@ -14,8 +14,8 @@ app = Flask(__name__)
 image_import = False 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model = NetworkColor()
-model.load_state_dict(torch.load('../model.pth'))
+model = NetworkColorWithScribble()
+model.load_state_dict(torch.load('../model2.pth'))
 model.to(device)
 model.eval()
 
@@ -28,8 +28,6 @@ def preprocess_image(image, started=False):
         v2.Resize((128,128), antialias=True),
     ])
     image = transform(image)
-    print(image[0, ...])
-    print("#################################################### ")
     if started:
         image[2, ...] = torch.zeros_like(image[2, ...])
         image[1, ...] = torch.zeros_like(image[1, ...])
@@ -52,7 +50,7 @@ def save_image():
         return 'Error saving image on the server', 500
 
 def colorize_image(input_image, output_image):
-    colorized_image = torch.cat((input_image[0].unsqueeze(0), output_image[0]), dim=0)
+    # colorized_image = torch.cat((input_image[0].unsqueeze(0), output_image[0]), dim=0)
     colorized_image = colorized_image.detach().moveaxis(0, 2).cpu()
     colorized_image_rgb = color.lab2rgb(colorized_image)
     return (colorized_image_rgb * 255).astype(np.uint8)
@@ -67,7 +65,9 @@ def render_colorized_image():
     input_image = preprocess_image(image)
     with torch.no_grad():
         output = model(input_image)
+    print(input_image.shape)
     input_image = input_image.squeeze(0)
+    print(input_image.shape)
     colorized_image = colorize_image(input_image, output)
     colorized_image_path = 'static/colorized_image.jpg'
     colorized_image = colorize_image(input_image, output)
@@ -96,7 +96,6 @@ def index():
             input_image = color.lab2rgb(input_image)
 
             input_image = Image.fromarray((input_image * 255).astype(np.uint8))
-            print("#################################################### ")
             
             input_image = input_image.resize((256,256))
             input_image.save(input_image_path)
