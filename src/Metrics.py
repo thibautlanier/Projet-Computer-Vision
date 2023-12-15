@@ -1,23 +1,20 @@
 import numpy as np
-import cv2
+from skimage.metrics import structural_similarity as ssim
+from skimage.metrics import peak_signal_noise_ratio as psnr
 import torch
 
 def compute_psnr(img1, img2):
-	mse = np.mean((img1 - img2) ** 2)
-	if mse == 0:
-		return float('inf')
-	max_pixel = 255.0
-	psnr = 20 * np.log10(max_pixel / np.sqrt(mse))
-	# psnr = cv2.PSNR(img1, img2)
-	return psnr
+	# mse = np.mean((img1 - img2) ** 2)
+	# if mse == 0:
+	# 	return float('inf')
+	# max_pixel = 255.0
+	# psnr = 20 * np.log10(max_pixel / np.sqrt(mse))
+	p = psnr(img1, img2)
+	return p
 
 def compute_ssim(img1, img2):
-	ssim = cv2.SSIM(img1, img2)
-	return ssim
-
-def compute_mse(img1, img2):
-	mse = np.mean((img1 - img2) ** 2)
-	return mse
+	s = ssim(img1, img2, channel_axis=0, data_range=(img1.max() - img1.min()))
+	return s
 
 def batch_metrics(model, X, y, device, metric="PSNR"):
 	batch_size = len(X)
@@ -33,8 +30,6 @@ def batch_metrics(model, X, y, device, metric="PSNR"):
 	m = compute_psnr
 	if metric == "SSIM":
 		m = compute_ssim
-	elif metric == "MSE":
-		m = compute_mse
 	for i in range(batch_size):
 		res += m(y[i], output[i])
 	return res
