@@ -20,7 +20,7 @@ def compute_mse(img1, img2):
 	return mse
 
 def batch_metrics(model, X, y, device, metric="PSNR"):
-	batch_size = X.shape[0]
+	batch_size = len(X)
 	model = model.to(device)
 	model.eval()
 	X = X.to(device)
