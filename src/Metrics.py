@@ -1,7 +1,14 @@
 import numpy as np
 from skimage.metrics import structural_similarity as ssim
 from skimage.metrics import peak_signal_noise_ratio as psnr
+from cv2 import color
 import torch
+
+def tensorToImg(tensor:torch.Tensor):
+	if len(tensor.shape) == 4:
+		tensor = tensor.squeeze(0)
+	return tensor.moveaxis(0,2).detach().cpu().numpy()
+
 
 def compute_psnr(img1, img2):
 	# mse = np.mean((img1 - img2) ** 2)
