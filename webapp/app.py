@@ -15,7 +15,7 @@ image_import = False
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = NetworkColorWithScribble()
-model.load_state_dict(torch.load('../model2.pth'))
+model.load_state_dict(torch.load('../model1%.pth'))
 model.to(device)
 model.eval()
 
@@ -27,6 +27,7 @@ def preprocess_image(image, started=False):
         v2.ToDtype(torch.float32),
         v2.Resize((128,128), antialias=True),
     ])
+    image = image.convert('RGB')
     image = transform(image)
     if started:
         image[2, ...] = torch.zeros_like(image[2, ...])
@@ -49,9 +50,8 @@ def save_image():
     except Exception as e:
         return 'Error saving image on the server', 500
 
-def colorize_image(input_image, output_image):
-    # colorized_image = torch.cat((input_image[0].unsqueeze(0), output_image[0]), dim=0)
-    colorized_image = colorized_image.detach().moveaxis(0, 2).cpu()
+def colorize_image(output_image):
+    colorized_image = output_image[0].detach().moveaxis(0, 2).cpu()
     colorized_image_rgb = color.lab2rgb(colorized_image)
     return (colorized_image_rgb * 255).astype(np.uint8)
 
@@ -61,16 +61,13 @@ def render_colorized_image():
     if not image_import:
         return render_template('index.html')
     image = Image.open('static/input_image.jpg')
-    image = image.convert('RGB')
+
     input_image = preprocess_image(image)
     with torch.no_grad():
         output = model(input_image)
-    print(input_image.shape)
     input_image = input_image.squeeze(0)
-    print(input_image.shape)
-    colorized_image = colorize_image(input_image, output)
+    colorized_image = colorize_image(output)
     colorized_image_path = 'static/colorized_image.jpg'
-    colorized_image = colorize_image(input_image, output)
     colorized_image = Image.fromarray(colorized_image)
     colorized_image = colorized_image.resize((256,256))
     colorized_image.save(colorized_image_path)
