@@ -1,0 +1,63 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Colorization </title>
+</head>
+
+<body>
+    <h1>Colorize images</h1>
+
+    <form action="/" method="post" enctype="multipart/form-data" id="uploadForm">
+        <input type="file" name="file" id="fileInput" accept=".jpg, .jpeg, .png" class="custom-file-input" onchange="this.form.submit()" required>
+        <label for="fileInput" class="custom-file-label">
+            <span>Select image files</span>
+        </label>
+        <button id="colorizeButton" type="button" onclick="colorizeImage()">
+            <img src="static/colorize_icon.jpg" alt="Colorize" width="40" height="40" >
+        </button>
+    </form>
+
+
+    <div class="image-container">
+        {% if input_image_path %}
+
+            <div class="image-wrapper">
+               <!-- input image -->
+                <img src="{{ input_image_path }}" alt="Input Image" id="inputImage">
+                <button id="editButton" class="edit-button" onclick="openModal()">Edit</button>
+            </div>
+
+       
+        {% endif %}
+   
+        <div class="image-wrapper" id="colorizedImageWrapper" >
+                       <!-- colorized image -->
+            <img alt="Colorized Image" id="colorizedImage" style="display: none;">
+        </div>
+        
+    </div>
+    <div id="myModal" class="modal">
+        <span class="close" onclick="closeModal()">&times;</span>
+
+        <input type="color" id="colorPicker" value="currentColor" onchange="setColor(event)">
+   
+        <!-- Canvas pour peindre l'image -->
+        <canvas class="modal-content" id="modalCanvas"
+        onmousedown="startPainting()"
+        onmouseup="stopPainting()"
+        onmousemove="paintImage(event)">
+        </canvas>
+        <button class="done-button" onclick="saveImage()">Done</button>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="static/script.js"></script>
+</body>
+
+</html>
+
